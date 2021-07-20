@@ -1,7 +1,7 @@
 const { Pool } = require('pg')
+const pool = new Pool()
 
 module.exports = async (req, res) =>{
-    const pool = new Pool()
     try {
         const query = pool.query('select * from opening_hours;')
         res.json(res.rows)
