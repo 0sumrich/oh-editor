@@ -1,0 +1,148 @@
+<script>
+    import { createEventDispatcher } from "svelte";
+    import { dayLookup, unique, timePos } from "../helper/main";
+    import OhChip from "./OhChip.svelte";
+    import Time from "./Time.svelte";
+    const dispatch = createEventDispatcher();
+    export let data = [];
+    export let openingTypes = [];
+    const headers =
+        data.length > 0
+            ? Object.keys(data[0]).map((s) =>
+                  s === "library" ? s : dayLookup(s)
+              )
+            : [];
+
+    // state
+    let clicked = false;
+    let pos;
+    let currOh;
+    let currOhOriginal;
+    let currTarget;
+    let currentDataIndex;
+    let currentDayIndex;
+
+    function reset() {
+        clicked = false;
+        currOh = undefined;
+        currOhOriginal = undefined;
+        pos = undefined;
+        currTarget = undefined;
+    }
+    function handleTableChange() {
+        dispatch("tableChange", { data, clicked });
+    }
+    // click handlers
+    const handleClickAway = (e) => {
+        const time = document.querySelector("#time");
+        if (time.contains(e.target) || e.target == time) {
+            clicked = true;
+        } else {
+            if (isValid(currOh)) {
+                reset();
+                handleTableChange();
+            }
+        }
+    };
+
+    function isValid(oh) {
+        const { start, finish } = oh;
+        const pattern = new RegExp("^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$");
+        return ![start, finish].map((x) => pattern.test(x)).includes(false);
+    }
+
+    const handleEscPress = (e) => {
+        if (
+            e.key === "Escape" ||
+            (document.activeElement.id === "opening-types" && e.key === "Enter")
+        ) {
+            if (isValid(currOh)) {
+                reset();
+                handleTableChange();
+            }
+            // else highlight problem
+        }
+    };
+
+    const handleChipClick = ({ detail }) => {
+        clicked = !clicked;
+        handleTableChange();
+
+        const { start, finish, opening_type, library, day, id, target } =
+            detail;
+        if (clicked) {
+            pos = timePos(target);
+            currOhOriginal = {
+                start,
+                finish,
+                opening_type,
+                library,
+                id,
+                day,
+            };
+            currOh = { start, finish, opening_type, library, id, day };
+            currTarget = target;
+            currentDataIndex = data
+                .map((o) => o.library)
+                .indexOf(currOh.library);
+            currentDayIndex = data[currentDataIndex][currOh.day]
+                .map((o) => o.id)
+                .indexOf(currOh.id);
+            document.addEventListener("click", handleClickAway, true);
+            document.addEventListener("keydown", handleEscPress, true);
+        }
+    };
+    $: if (clicked) {
+        const { start, finish, opening_type, id, day } = currOh;
+        data[currentDataIndex][day][currentDayIndex] = {
+            start,
+            finish,
+            opening_type,
+            id,
+        };
+    }
+    $: if (!clicked) {
+        document.removeEventListener("click", handleClickAway, true);
+        document.removeEventListener("keydown", handleEscPress, true);
+    }
+</script>
+
+<div class="relative">
+    <table class="table-auto border border-collapse">
+        <thead>
+            {#each headers as header}
+                <th
+                    class="sticky top-0 font-medium capitalize p-2 border bg-white"
+                    >{header}</th
+                >
+            {/each}
+        </thead>
+        <tbody>
+            {#each data as { library, ...d }}
+                <tr class="border border-collapse">
+                    <td class="p-2">{library}</td>
+                    {#each Object.keys(d) as day}
+                        <td class="p-2 align-top">
+                            {#each d[day] as chipData}
+                                <OhChip
+                                    data={{ day, library, ...chipData }}
+                                    {openingTypes}
+                                    on:chipClick={handleChipClick}
+                                />
+                            {/each}
+                        </td>
+                    {/each}
+                </tr>
+            {/each}
+        </tbody>
+    </table>
+    {#if clicked}
+        <Time bind:hours={currOh} {pos} {openingTypes} />
+    {/if}
+</div>
+
+<style>
+    table {
+        width: 100%;
+    }
+</style>

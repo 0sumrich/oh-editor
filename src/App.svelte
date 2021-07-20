@@ -1,33 +1,27 @@
+<!-- <script context="module">
+    export async function load({ fetch }) {
+        const res = await fetch("/api/data");
+        if (res.ok) {
+            return {
+                props: { initData: await res.json().then((res) => res.data) },
+            };
+        }
+        return {
+            status: res.status,
+            error: new Error(`Could not load the dataaaa`),
+        };
+    }
+</script> -->
 <script>
-	import Tailwindcss from './Tailwindcss.svelte';
-
-	export let name;
+    import Tailwind from "./Tailwindcss.svelte";
+    import Main from './components/Main.svelte'
+    const fetchData = async () =>
+        await fetch("/api/data").then((res) => res.json());
 </script>
 
-<Tailwindcss />
-<main>
-	<h1>Hello {name}!</h1>
-	<p>Visit the <a href="https://svelte.dev/tutorial">Svelte tutorial</a> to learn how to build Svelte apps.</p>
-</main>
-
-<style>
-	main {
-		text-align: center;
-		padding: 1em;
-		max-width: 240px;
-		margin: 0 auto;
-	}
-
-	h1 {
-		color: #ff3e00;
-		text-transform: uppercase;
-		font-size: 4em;
-		font-weight: 100;
-	}
-
-	@media (min-width: 640px) {
-		main {
-			max-width: none;
-		}
-	}
-</style>
+<Tailwind />
+{#await fetchData()}
+    <div>loading...</div>
+{:then initData}
+    <Main {initData} />
+{/await}
