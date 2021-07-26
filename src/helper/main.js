@@ -2,14 +2,14 @@ import { DateTime } from 'luxon'
 
 export const unique = (arr, value) => [...new Set(arr.map(o => o[value]))]
 
-function filterToCurrentData(initData){
+export function filterToCurrentData(initData) {
+    initData.forEach(r => r.updated = DateTime.fromISO(r.updated))
     const maxDate = DateTime.max(...initData.map(row => row.updated))
-    return initData.filter(row => row.update===maxDate)
+    return initData.filter(({ updated }) => updated.equals(maxDate))
 }
 
-export function parseData(inputData) {
-    const d = filterToCurrentData(inputData)
-    d.forEach((row, i) => row.id=i)
+export function parseData(d) {
+    d.forEach((row, i) => row.id = i)
     const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
     const libs = unique(d, 'library')
     const res = []
@@ -47,5 +47,5 @@ export function timePos(el) {
         top < window.innerHeight / 2
             ? `${rect.height + 10}px`
             : "-100%";
-    return {top, left, translateY}
+    return { top, left, translateY }
 }

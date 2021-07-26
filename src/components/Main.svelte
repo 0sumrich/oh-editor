@@ -1,11 +1,12 @@
 <script>
-    import { parseData, unique } from "../helper/main";
+    import { parseData, unique, filterToCurrentData } from "../helper/main";
     import Table from "./Table.svelte";
     import Legend from "./Legend.svelte";
     export let initData;
+    const filteredToCurrentData = filterToCurrentData(initData)
     let validData = true;
-    const openingTypes = unique(initData, "opening_type");
-    let data = parseData(initData);
+    let data = parseData(filteredToCurrentData);
+    const openingTypes = unique(filteredToCurrentData, "opening_type");
     let currentData;
     // to do - grey out save button if data not valid
     const handleTableChange = ({ detail }) => {
