@@ -6,3 +6,4 @@
 .vercel
 package-lock.json
 .env
+/db_setup/add_more.py

@@ -1,0 +1,1 @@
+SELECT * from opening_hours;
