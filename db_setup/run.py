@@ -19,14 +19,3 @@ def _setup_railway_db(csv_filename):
     df.to_sql(name='opening_hours', con=engine, index=False, if_exists='append')
     df = pd.read_sql('select * from opening_hours', con=engine)
     print(df)
-
-def _add_more_files(dn):
-    engine = create_engine(getenv('DATABASE_URL'))
-    def _add_updated(s):
-        date_string = s.split('\\')[-1].replace('opening hours ', '').replace('.csv','')
-        return datetime.strptime(date_string, '%Y-%m-%d')
-    df = pd.concat([pd.read_csv(fn).assign(updated = lambda x: _add_updated(fn)) for fn in glob.glob(path.join(dn, '*.csv')) if 'opening hours' in fn and '2019-08-31' not in fn])
-    df.index.name='id'
-    df.to_sql(name='opening_hours', con=engine, index=False, if_exists='append')
-    df = pd.read_sql('select * from opening_hours', con=engine)
-    print(df)
