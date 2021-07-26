@@ -1,6 +1,14 @@
+import { DateTime } from 'luxon'
+
 export const unique = (arr, value) => [...new Set(arr.map(o => o[value]))]
 
-export function parseData(d) {
+function filterToCurrentData(initData){
+    const maxDate = DateTime.max(...initData.map(row => row.updated))
+    return initData.filter(row => row.update===maxDate)
+}
+
+export function parseData(inputData) {
+    const d = filterToCurrentData(inputData)
     d.forEach((row, i) => row.id=i)
     const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
     const libs = unique(d, 'library')
