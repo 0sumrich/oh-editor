@@ -1,19 +1,19 @@
 <script>
     import { createEventDispatcher } from "svelte";
-    import { dayLookup, unique, timePos } from "../helper/main";
+    import { dayLookup, getHoursFromString, timePos } from "../helper/main";
     import OhChip from "./OhChip.svelte";
     import Time from "./Time.svelte";
-    import TotalChip from './TotalChip.svelte'
+    import TotalChip from "./TotalChip.svelte";
     const dispatch = createEventDispatcher();
     export let data = [];
     export let openingTypes = [];
     const headers =
         data.length > 0
             ? Object.keys(data[0]).map((s) =>
-                  ['library','total'].includes(s) ? s : dayLookup(s)
+                  ["library", "total"].includes(s) ? s : dayLookup(s)
               )
             : [];
-    
+
     // state
     let clicked = false;
     let pos;
@@ -23,7 +23,24 @@
     let currentDataIndex;
     let currentDayIndex;
 
+    function calculateTotal(row){
+        const weekdays = Object.keys(row).filter(key => !['library','total'].includes(key))
+        let total = {}
+        for (const day of weekdays){
+            for (const {start, finish, opening_type} of row[day]){
+                const dayTotal = getHoursFromString(finish) - getHoursFromString(start)
+                if (total.hasOwnProperty(opening_type)){
+                    total[opening_type] += dayTotal
+                } else {
+                    total[opening_type] = dayTotal
+                }
+            }
+        }
+        return total
+    }
+
     function reset() {
+        data[currentDataIndex]['total'] = calculateTotal(data[currentDataIndex])
         clicked = false;
         currOh = undefined;
         currOhOriginal = undefined;
@@ -33,6 +50,13 @@
     function handleTableChange() {
         dispatch("tableChange", { data, clicked });
     }
+
+    function isValid(oh) {
+        const { start, finish } = oh;
+        const pattern = new RegExp("^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$");
+        return ![start, finish].map((x) => pattern.test(x)).includes(false);
+    }
+
     // click handlers
     const handleClickAway = (e) => {
         const time = document.querySelector("#time");
@@ -45,12 +69,6 @@
             }
         }
     };
-
-    function isValid(oh) {
-        const { start, finish } = oh;
-        const pattern = new RegExp("^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$");
-        return ![start, finish].map((x) => pattern.test(x)).includes(false);
-    }
 
     const handleEscPress = (e) => {
         if (
@@ -137,7 +155,11 @@
                     <!-- total goes here -->
                     <td class="p-2">
                         {#each Object.keys(total) as openingType}
-                            <TotalChip {openingTypes} {openingType} total={total[openingType]} />                        
+                            <TotalChip
+                                {openingTypes}
+                                {openingType}
+                                total={total[openingType]}
+                            />
                         {/each}
                     </td>
                 </tr>

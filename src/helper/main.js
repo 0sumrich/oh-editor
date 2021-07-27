@@ -8,7 +8,7 @@ export function filterToCurrentData(initData) {
     return initData.filter(({ updated }) => updated.equals(maxDate))
 }
 
-const getHoursFromString = s => {
+export const getHoursFromString = s => {
     const [h, m] = s.split(':').map(d => +d)
     return h + (m / 60)
 }

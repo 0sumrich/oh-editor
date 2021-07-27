@@ -22,10 +22,9 @@
         const jsonB = JSON.stringify(b)
         return jsonA===jsonB
     }
-    $: if(currentData) {
-        // console.log(dataIsEqual(data, currentData))
-        console.log(dataIsEqual(parseData(filteredToCurrentData), data))
-    }
+    // $: if(currentData) {
+    //     console.log(dataIsEqual(parseData(filteredToCurrentData), data))
+    // }
     function resetData(){
         const originalData = parseData(filteredToCurrentData)
         if (!dataIsEqual(originalData), data){
