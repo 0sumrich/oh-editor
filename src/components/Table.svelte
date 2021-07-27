@@ -12,7 +12,7 @@
                   s === "library" ? s : dayLookup(s)
               )
             : [];
-
+    
     // state
     let clicked = false;
     let pos;
