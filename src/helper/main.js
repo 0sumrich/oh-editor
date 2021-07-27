@@ -8,6 +8,11 @@ export function filterToCurrentData(initData) {
     return initData.filter(({ updated }) => updated.equals(maxDate))
 }
 
+const getHoursFromString = s => {
+    const [h, m] = s.split(':').map(d => +d)
+    return h + (m / 60)
+}
+
 export function parseData(d) {
     d.forEach((row, i) => row.id = i)
     const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
@@ -16,10 +21,21 @@ export function parseData(d) {
     for (const lib of libs) {
         const curr = d.filter(o => o.library === lib)
         const row = { library: lib }
+        let totalHoursForTheWeek = {}
         for (const day of weekdays) {
             const hours = curr.filter(o => o.day === day)
             row[day] = hours.map(({ start, finish, opening_type, id }) => ({ start, finish, opening_type, id }))
+            hours.forEach(hour => {
+                const { opening_type, start, finish } = hour
+                const total = getHoursFromString(finish) - getHoursFromString(start)
+                if(!totalHoursForTheWeek.hasOwnProperty(opening_type)){
+                    totalHoursForTheWeek[opening_type]=total
+                } else {
+                    totalHoursForTheWeek[opening_type]+=total
+                }
+            })
         }
+        row.total = totalHoursForTheWeek
         res.push(row)
     }
     return res

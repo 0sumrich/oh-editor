@@ -3,13 +3,14 @@
     import { dayLookup, unique, timePos } from "../helper/main";
     import OhChip from "./OhChip.svelte";
     import Time from "./Time.svelte";
+    import TotalChip from './TotalChip.svelte'
     const dispatch = createEventDispatcher();
     export let data = [];
     export let openingTypes = [];
     const headers =
         data.length > 0
             ? Object.keys(data[0]).map((s) =>
-                  s === "library" ? s : dayLookup(s)
+                  ['library','total'].includes(s) ? s : dayLookup(s)
               )
             : [];
     
@@ -118,8 +119,9 @@
             {/each}
         </thead>
         <tbody>
-            {#each data as { library, ...d }}
+            {#each data as { library, total, ...d }}
                 <tr class="border border-collapse">
+                    <!-- week days -->
                     <td class="p-2">{library}</td>
                     {#each Object.keys(d) as day}
                         <td class="p-2 align-top">
@@ -132,6 +134,12 @@
                             {/each}
                         </td>
                     {/each}
+                    <!-- total goes here -->
+                    <td class="p-2">
+                        {#each Object.keys(total) as openingType}
+                            <TotalChip {openingTypes} {openingType} total={total[openingType]} />                        
+                        {/each}
+                    </td>
                 </tr>
             {/each}
         </tbody>
