@@ -8,12 +8,30 @@
     let data = parseData(filteredToCurrentData);
     const openingTypes = unique(filteredToCurrentData, "opening_type");
     let currentData;
-    // to do - grey out save button if data not valid
     const handleTableChange = ({ detail }) => {
         // if the edit window is open and the ohchip is still in clicked, the data is not valid
         validData = !detail.clicked;
         currentData = detail.data;
     };
+    // to do - min requirements
+    // 2. total column
+    // 3. save changes
+    // 4. revert to a historic version and undo
+    function dataIsEqual(a, b){
+        const jsonA = JSON.stringify(a)
+        const jsonB = JSON.stringify(b)
+        return jsonA===jsonB
+    }
+    $: if(currentData) {
+        // console.log(dataIsEqual(data, currentData))
+        console.log(dataIsEqual(parseData(filteredToCurrentData), data))
+    }
+    function resetData(){
+        const originalData = parseData(filteredToCurrentData)
+        if (!dataIsEqual(originalData), data){
+            data = originalData
+        }
+    }
 </script>
 
 <main class="container mx-auto p-4 content-center">
@@ -30,6 +48,13 @@
             disabled={!validData}
         >
             Save changes
+        </button>
+        <button
+            id="undo"
+            class={"bg-yellow-500 hover:bg-yellow-700 text-white py-2 px-4 rounded-full"}
+            on:click={resetData}
+        >
+            Undo changes
         </button>
     </div>
 </footer>
