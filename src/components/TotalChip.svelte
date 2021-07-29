@@ -1,8 +1,8 @@
 <script>
+    import { openingTypes } from "./stores";
     export let total;
     export let openingType;
-    export let openingTypes;
-    const idx = openingTypes.indexOf(openingType);
+    const idx = $openingTypes.indexOf(openingType);
 </script>
 
 <div

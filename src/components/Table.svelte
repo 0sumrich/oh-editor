@@ -1,12 +1,12 @@
 <script>
     import { createEventDispatcher } from "svelte";
     import { dayLookup, getHoursFromString, timePos } from "../helper/main";
+    import { openingTypes } from "./stores";
     import OhChip from "./OhChip.svelte";
     import Time from "./Time.svelte";
     import TotalChip from "./TotalChip.svelte";
     const dispatch = createEventDispatcher();
     export let data = [];
-    export let openingTypes = [];
     const headers =
         data.length > 0
             ? Object.keys(data[0]).map((s) =>
@@ -23,24 +23,29 @@
     let currentDataIndex;
     let currentDayIndex;
 
-    function calculateTotal(row){
-        const weekdays = Object.keys(row).filter(key => !['library','total'].includes(key))
-        let total = {}
-        for (const day of weekdays){
-            for (const {start, finish, opening_type} of row[day]){
-                const dayTotal = getHoursFromString(finish) - getHoursFromString(start)
-                if (total.hasOwnProperty(opening_type)){
-                    total[opening_type] += dayTotal
+    function calculateTotal(row) {
+        const weekdays = Object.keys(row).filter(
+            (key) => !["library", "total"].includes(key)
+        );
+        let total = {};
+        for (const day of weekdays) {
+            for (const { start, finish, opening_type } of row[day]) {
+                const dayTotal =
+                    getHoursFromString(finish) - getHoursFromString(start);
+                if (total.hasOwnProperty(opening_type)) {
+                    total[opening_type] += dayTotal;
                 } else {
-                    total[opening_type] = dayTotal
+                    total[opening_type] = dayTotal;
                 }
             }
         }
-        return total
+        return total;
     }
 
     function reset() {
-        data[currentDataIndex]['total'] = calculateTotal(data[currentDataIndex])
+        data[currentDataIndex]["total"] = calculateTotal(
+            data[currentDataIndex]
+        );
         clicked = false;
         currOh = undefined;
         currOhOriginal = undefined;
@@ -146,7 +151,6 @@
                             {#each d[day] as chipData}
                                 <OhChip
                                     data={{ day, library, ...chipData }}
-                                    {openingTypes}
                                     on:chipClick={handleChipClick}
                                 />
                             {/each}
@@ -156,7 +160,6 @@
                     <td class="p-2">
                         {#each Object.keys(total) as openingType}
                             <TotalChip
-                                {openingTypes}
                                 {openingType}
                                 total={total[openingType]}
                             />
@@ -167,7 +170,7 @@
         </tbody>
     </table>
     {#if clicked}
-        <Time bind:hours={currOh} {pos} {openingTypes} />
+        <Time bind:hours={currOh} {pos} />
     {/if}
 </div>
 

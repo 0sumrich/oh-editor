@@ -1,10 +1,11 @@
 <script>
-    export let openingTypes;
+    import { openingTypes } from "./stores";
+    console.log($openingTypes)
 </script>
 
-<div class='mb-8'>
+<div class="mb-8">
     <p>Opening types</p>
-    {#each openingTypes as openingType, idx}
+    {#each $openingTypes as openingType, idx}
         <div
             class={`legend rounded-full p-1 m-1 text-center ${
                 [
