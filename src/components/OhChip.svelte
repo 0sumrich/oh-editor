@@ -1,6 +1,6 @@
 <script>
     import { createEventDispatcher } from "svelte";
-    export let openingTypes;
+    import { openingTypes } from "./stores";
     export let data;
     const dispatch = createEventDispatcher();
     function handleClick({ target }) {
@@ -11,7 +11,7 @@
     }
     let idx = 0;
     $: if (data.opening_type) {
-        idx = openingTypes.indexOf(data.opening_type);
+        idx = $openingTypes.indexOf(data.opening_type);
     }
     // need to include the whole tailwind css class in the html, otherwise purge will purge it in production
 </script>
