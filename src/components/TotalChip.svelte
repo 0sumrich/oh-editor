@@ -2,7 +2,7 @@
     import { openingTypes } from "./stores";
     export let total;
     export let openingType;
-    const idx = $openingTypes.indexOf(openingType);
+    $: idx = $openingTypes.indexOf(openingType);
 </script>
 
 <div
