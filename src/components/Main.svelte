@@ -34,12 +34,26 @@
         }
     }
 
+    function unparse(data) {
+        // library, day, start, finish, opening_type
+        const res = []
+        for (const r of data) {
+            const { library, total, ...d } = r;
+            for(const day of Object.keys(d)){
+                for(const {start, finish, opening_type} of d[day]){
+                    res.push({library, day, start, finish, opening_type})
+                }
+            }
+        }
+        return res
+    }
+
     async function handleSaveClick() {
         if (dataIsEqual(originalData(), data)) {
             alert("No changes made yet");
         } else {
             try {
-                const res = await postData("api/newOpeningHours", currentData);
+                const res = await postData("api/newOpeningHours", unparse(data));
                 console.log(res);
             } catch (e) {
                 alert(e.message);
