@@ -1,5 +1,11 @@
 <script>
-    import { parseData, unique, filterToCurrentData } from "../helper/main";
+    import {
+        parseData,
+        unique,
+        filterToCurrentData,
+        postData,
+        dataIsEqual,
+    } from "../helper/main";
     import { openingTypes } from "./stores";
     import Table from "./Table.svelte";
     import Legend from "./Legend.svelte";
@@ -9,27 +15,35 @@
     let data = parseData(filteredToCurrentData);
     openingTypes.set(unique(filteredToCurrentData, "opening_type"));
     let currentData;
+
     const handleTableChange = ({ detail }) => {
         // if the edit window is open and the ohchip is still in clicked, the data is not valid
         validData = !detail.clicked;
         currentData = detail.data;
     };
-    // to do - min requirements
-    // 1. add an opening type
-    // 3. save changes
-    // 4. revert to a historic version and undo
-    function dataIsEqual(a, b) {
-        const jsonA = JSON.stringify(a);
-        const jsonB = JSON.stringify(b);
-        return jsonA === jsonB;
-    }
+
     // $: if(currentData) {
     //     console.log(dataIsEqual(parseData(filteredToCurrentData), data))
     // }
+    const originalData = () => parseData(filterToCurrentData(initData));
+
     function resetData() {
-        const originalData = parseData(filteredToCurrentData);
-        if ((!dataIsEqual(originalData), data)) {
-            data = originalData;
+        const original = originalData();
+        if (!dataIsEqual(original, data)) {
+            data = original;
+        }
+    }
+
+    async function handleSaveClick() {
+        if (dataIsEqual(originalData(), data)) {
+            alert("No changes made yet");
+        } else {
+            try {
+                const res = await postData("api/newOpeningHours", currentData);
+                console.log(res);
+            } catch (e) {
+                alert(e.message);
+            }
         }
     }
 </script>
@@ -46,6 +60,7 @@
                 ? "bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-full"
                 : "bg-blue-500 cursor-not-allowed text-white py-2 px-4 rounded-full opacity-50"}
             disabled={!validData}
+            on:click={handleSaveClick}
         >
             Save changes
         </button>
