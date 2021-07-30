@@ -1,6 +1,5 @@
 <script>
     import { openingTypes } from "./stores";
-    console.log($openingTypes)
 </script>
 
 <div class="mb-8">
