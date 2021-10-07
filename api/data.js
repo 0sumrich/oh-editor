@@ -20,7 +20,7 @@ const allowCors = fn => async (req, res) => {
 const getData = async (req, res) => {
     try {
         const pool = new Pool()
-        const query = await pool.query('select * from opening_hours;')
+        const query = await pool.query('SELECT * from opening_hours ORDER BY library, start, id, updated;')
         await pool.end()
         res.json(query.rows)
     } catch (e) {
