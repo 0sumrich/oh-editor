@@ -148,11 +148,16 @@
                     <td class="p-2">{library}</td>
                     {#each Object.keys(d) as day}
                         <td class="p-2 align-top">
+                            <!-- if d[day] is an array full of chipdata objects eg. start, finish, openingtype -->
                             {#each d[day] as chipData}
                                 <OhChip
                                     data={{ day, library, ...chipData }}
                                     on:chipClick={handleChipClick}
                                 />
+                            {:else}
+                            <!-- else d[day] is an empty array -->
+                            <!-- needs to be clickable with a form, to do -->
+                                <div></div>
                             {/each}
                         </td>
                     {/each}
