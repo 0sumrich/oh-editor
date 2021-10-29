@@ -87,9 +87,3 @@
         </button>
     </div>
 </footer>
-
-<style>
-    main {
-        margin-bottom: 75px;
-    }
-</style>
