@@ -1,2 +1,2 @@
 SELECT * from opening_hours
-ORDER BY id, library, start;
+ORDER BY library, start, id, updated;

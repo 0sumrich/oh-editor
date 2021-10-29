@@ -31,4 +31,4 @@ def _add_file(csv_filename, date):
     df = pd.read_sql('select * from opening_hours', con=engine)
     print(df)
 
-_add_file('opening hours 2021-10-04.csv', datetime(2021,10,4))
+_add_file('opening hours 2021-10-25.csv', datetime(2021,10,25))
