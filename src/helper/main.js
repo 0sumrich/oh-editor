@@ -28,10 +28,10 @@ export function parseData(d) {
             hours.forEach(hour => {
                 const { opening_type, start, finish } = hour
                 const total = getHoursFromString(finish) - getHoursFromString(start)
-                if(!totalHoursForTheWeek.hasOwnProperty(opening_type)){
-                    totalHoursForTheWeek[opening_type]=total
+                if (!totalHoursForTheWeek.hasOwnProperty(opening_type)) {
+                    totalHoursForTheWeek[opening_type] = total
                 } else {
-                    totalHoursForTheWeek[opening_type]+=total
+                    totalHoursForTheWeek[opening_type] += total
                 }
             })
         }
@@ -75,17 +75,36 @@ export function dataIsEqual(a, b) {
 export async function postData(url = '', data = {}) {
     // Default options are marked with *
     const response = await fetch(url, {
-      method: 'POST', // *GET, POST, PUT, DELETE, etc.
-      mode: 'same-origin', // no-cors, *cors, same-origin
-      cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-    //   credentials: 'same-origin', // include, *same-origin, omit
-      headers: {
-        'Content-Type': 'application/json'
-        // 'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      redirect: 'follow', // manual, *follow, error
-    //   referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-      body: JSON.stringify(data) // body data type must match "Content-Type" header
+        method: 'POST', // *GET, POST, PUT, DELETE, etc.
+        mode: 'same-origin', // no-cors, *cors, same-origin
+        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+        //   credentials: 'same-origin', // include, *same-origin, omit
+        headers: {
+            'Content-Type': 'application/json'
+            // 'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        redirect: 'follow', // manual, *follow, error
+        //   referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+        body: JSON.stringify(data) // body data type must match "Content-Type" header
     });
     return response.json(); // parses JSON response into native JavaScript objects
-  }
+}
+
+export function calculateTotal(row) {
+    const weekdays = Object.keys(row).filter(
+        (key) => !["library", "total"].includes(key)
+    );
+    let total = {};
+    for (const day of weekdays) {
+        for (const { start, finish, opening_type } of row[day]) {
+            const dayTotal =
+                getHoursFromString(finish) - getHoursFromString(start);
+            if (total.hasOwnProperty(opening_type)) {
+                total[opening_type] += dayTotal;
+            } else {
+                total[opening_type] = dayTotal;
+            }
+        }
+    }
+    return total;
+}

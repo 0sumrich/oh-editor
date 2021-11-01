@@ -1,6 +1,6 @@
 <script>
     import { createEventDispatcher } from "svelte";
-    import { dayLookup, getHoursFromString, timePos } from "../helper/main";
+    import { dayLookup, timePos, calculateTotal } from "../helper/main";
     import { data, chipClicked,  } from "./stores";
     import OhChip from "./OhChip.svelte";
     import Time from "./Time.svelte";
@@ -22,25 +22,6 @@
     let currentDataIndex;
     let currentDayIndex;
 
-    function calculateTotal(row) {
-        const weekdays = Object.keys(row).filter(
-            (key) => !["library", "total"].includes(key)
-        );
-        let total = {};
-        for (const day of weekdays) {
-            for (const { start, finish, opening_type } of row[day]) {
-                const dayTotal =
-                    getHoursFromString(finish) - getHoursFromString(start);
-                if (total.hasOwnProperty(opening_type)) {
-                    total[opening_type] += dayTotal;
-                } else {
-                    total[opening_type] = dayTotal;
-                }
-            }
-        }
-        return total;
-    }
-
     function reset() {
         $data[currentDataIndex]["total"] = calculateTotal(
             $data[currentDataIndex]
@@ -50,12 +31,6 @@
         currOhOriginal = undefined;
         pos = undefined;
         currTarget = undefined;
-    }
-
-    function handleTableChange() {
-        // used for greying out the buttons
-        // const dataState = $data
-        dispatch("tableChange", { data: $data, clicked: $chipClicked })
     }
 
     function isValid(oh) {

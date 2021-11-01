@@ -1,7 +1,7 @@
 <script>
   import { onMount } from "svelte";
   import { openingTypes, data, chipClicked } from "./stores";
-
+  import { calculateTotal } from "../helper/main";
   export let hours;
   export let pos;
 
@@ -22,6 +22,7 @@
     );
     const dataCopy = $data;
     dataCopy[libraryIndex][hours.day] = newHours;
+    dataCopy[libraryIndex].total = calculateTotal(dataCopy[libraryIndex])
     data.set(dataCopy);
     chipClicked.set(false);
   }
