@@ -6,54 +6,47 @@
         postData,
         dataIsEqual,
     } from "../helper/main";
-    import { openingTypes } from "./stores";
+    import { openingTypes, data, chipClicked } from "./stores";
     import Table from "./Table.svelte";
     import Legend from "./Legend.svelte";
     export let initData;
-    const filteredToCurrentData = filterToCurrentData(initData);
-    let validData = true;
-    let data = parseData(filteredToCurrentData);
-    openingTypes.set(unique(filteredToCurrentData, "opening_type"));
-    let currentData;
 
-    const handleTableChange = ({ detail }) => {
-        // if the edit window is open and the ohchip is still in clicked, the data is not valid
-        validData = !detail.clicked;
-        currentData = detail.data;
+    const originalData = () => {
+        const filteredToCurrentData = filterToCurrentData(initData);
+        return parseData(filteredToCurrentData);
     };
 
-    // $: if(currentData) {
-    //     console.log(dataIsEqual(parseData(filteredToCurrentData), data))
-    // }
-    const originalData = () => parseData(filterToCurrentData(initData));
-
-    function resetData() {
-        const original = originalData();
-        if (!dataIsEqual(original, data)) {
-            data = original;
-        }
-    }
+    const resetData = () => {
+        const filteredToCurrentData = filterToCurrentData(initData);
+        openingTypes.set(unique(filteredToCurrentData, "opening_type"));
+        data.set(parseData(filteredToCurrentData));
+    };
+    // also initialises data
+    resetData();
 
     function unparse(data) {
         // library, day, start, finish, opening_type
-        const res = []
+        const res = [];
         for (const r of data) {
             const { library, total, ...d } = r;
-            for(const day of Object.keys(d)){
-                for(const {start, finish, opening_type} of d[day]){
-                    res.push({library, day, start, finish, opening_type})
+            for (const day of Object.keys(d)) {
+                for (const { start, finish, opening_type } of d[day]) {
+                    res.push({ library, day, start, finish, opening_type });
                 }
             }
         }
-        return res
+        return res;
     }
 
     async function handleSaveClick() {
-        if (dataIsEqual(originalData(), data)) {
+        if (dataIsEqual(originalData(), $data)) {
             alert("No changes made yet");
         } else {
             try {
-                const res = await postData("api/newOpeningHours", unparse(data));
+                const res = await postData(
+                    "api/newOpeningHours",
+                    unparse($data)
+                );
                 console.log(res);
             } catch (e) {
                 alert(e.message);
@@ -64,16 +57,16 @@
 
 <main class="container mx-auto p-4 content-center">
     <Legend />
-    <Table {data} on:tableChange={handleTableChange} />
+    <Table />
 </main>
 <footer class="relative">
     <div class="fixed bottom-0 w-full bg-white p-4 text-center">
         <button
             id="save"
-            class={validData
-                ? "bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-full"
-                : "bg-blue-500 cursor-not-allowed text-white py-2 px-4 rounded-full opacity-50"}
-            disabled={!validData}
+            class={$chipClicked
+                ? "bg-blue-500 cursor-not-allowed text-white py-2 px-4 rounded-full opacity-50"
+                : "bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-full"}
+            disabled={$chipClicked}
             on:click={handleSaveClick}
         >
             Save changes

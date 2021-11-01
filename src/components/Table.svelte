@@ -1,21 +1,20 @@
 <script>
     import { createEventDispatcher } from "svelte";
     import { dayLookup, getHoursFromString, timePos } from "../helper/main";
-    import { openingTypes } from "./stores";
+    import { data, chipClicked,  } from "./stores";
     import OhChip from "./OhChip.svelte";
     import Time from "./Time.svelte";
     import TotalChip from "./TotalChip.svelte";
     const dispatch = createEventDispatcher();
-    export let data = [];
     const headers =
-        data.length > 0
-            ? Object.keys(data[0]).map((s) =>
+        $data.length > 0
+            ? Object.keys($data[0]).map((s) =>
                   ["library", "total"].includes(s) ? s : dayLookup(s)
               )
             : [];
 
     // state
-    let clicked = false;
+    // let $chipClicked = false;
     let pos;
     let currOh;
     let currOhOriginal;
@@ -43,20 +42,24 @@
     }
 
     function reset() {
-        data[currentDataIndex]["total"] = calculateTotal(
-            data[currentDataIndex]
+        $data[currentDataIndex]["total"] = calculateTotal(
+            $data[currentDataIndex]
         );
-        clicked = false;
+        chipClicked.set(false)
         currOh = undefined;
         currOhOriginal = undefined;
         pos = undefined;
         currTarget = undefined;
     }
+
     function handleTableChange() {
-        dispatch("tableChange", { data, clicked });
+        // used for greying out the buttons
+        // const dataState = $data
+        dispatch("tableChange", { data: $data, clicked: $chipClicked })
     }
 
     function isValid(oh) {
+        // checks whether the Time.svelte form is a valid time or not
         const { start, finish } = oh;
         const pattern = new RegExp("^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$");
         return ![start, finish].map((x) => pattern.test(x)).includes(false);
@@ -66,11 +69,10 @@
     const handleClickAway = (e) => {
         const time = document.querySelector("#time");
         if (time.contains(e.target) || e.target == time) {
-            clicked = true;
+            $chipClicked = true;
         } else {
             if (isValid(currOh)) {
                 reset();
-                handleTableChange();
             }
         }
     };
@@ -82,19 +84,17 @@
         ) {
             if (isValid(currOh)) {
                 reset();
-                handleTableChange();
             }
             // else highlight problem
         }
     };
 
     const handleChipClick = ({ detail }) => {
-        clicked = !clicked;
-        handleTableChange();
+        chipClicked.update(clickState => !clickState);
 
         const { start, finish, opening_type, library, day, id, target } =
             detail;
-        if (clicked) {
+        if ($chipClicked) {
             pos = timePos(target);
             currOhOriginal = {
                 start,
@@ -106,26 +106,27 @@
             };
             currOh = { start, finish, opening_type, library, id, day };
             currTarget = target;
-            currentDataIndex = data
+            currentDataIndex = $data
                 .map((o) => o.library)
                 .indexOf(currOh.library);
-            currentDayIndex = data[currentDataIndex][currOh.day]
+            currentDayIndex = $data[currentDataIndex][currOh.day]
                 .map((o) => o.id)
                 .indexOf(currOh.id);
             document.addEventListener("click", handleClickAway, true);
             document.addEventListener("keydown", handleEscPress, true);
         }
     };
-    $: if (clicked) {
+
+ $: if ($chipClicked) {
         const { start, finish, opening_type, id, day } = currOh;
-        data[currentDataIndex][day][currentDayIndex] = {
+        $data[currentDataIndex][day][currentDayIndex] = {
             start,
             finish,
             opening_type,
             id,
         };
     }
-    $: if (!clicked) {
+    $: if (!$chipClicked) {
         document.removeEventListener("click", handleClickAway, true);
         document.removeEventListener("keydown", handleEscPress, true);
     }
@@ -142,7 +143,7 @@
             {/each}
         </thead>
         <tbody>
-            {#each data as { library, total, ...d }}
+            {#each $data as { library, total, ...d }}
                 <tr class="border border-collapse">
                     <!-- week days -->
                     <td class="p-2">{library}</td>
@@ -155,9 +156,9 @@
                                     on:chipClick={handleChipClick}
                                 />
                             {:else}
-                            <!-- else d[day] is an empty array -->
-                            <!-- needs to be clickable with a form, to do -->
-                                <div></div>
+                                <!-- TODO: else d[day] is an empty array -->
+                                <!-- needs to be clickable with a form, to do -->
+                                <div />
                             {/each}
                         </td>
                     {/each}
@@ -174,7 +175,7 @@
             {/each}
         </tbody>
     </table>
-    {#if clicked}
+    {#if $chipClicked}
         <Time bind:hours={currOh} {pos} />
     {/if}
 </div>
