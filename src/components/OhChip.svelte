@@ -13,7 +13,6 @@
     $: if (data.opening_type) {
         idx = $openingTypes.indexOf(data.opening_type);
     }
-    // need to include the whole tailwind css class in the html, otherwise purge will purge it in production
 </script>
 
 {#if data.start}
